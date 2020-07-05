@@ -50,11 +50,15 @@ func createToolBuffer() (err error) {
         return
     }
 
-    body, _ := ioutil.ReadAll(res.Body)
-    tool_buffer.content = fmt.Sprintf("%s", body)
-    tool_buffer.timestamp = (time.Now()).Unix()
+    body, err := ioutil.ReadAll(res.Body)
+    if err != nil {
+        return
+    }
 
     entry_list = nil
+
+    tool_buffer.content = fmt.Sprintf("%s", body)
+    tool_buffer.timestamp = (time.Now()).Unix()
 
     scanner := bufio.NewScanner(strings.NewReader(tool_buffer.content))
     for scanner.Scan() {
@@ -75,7 +79,7 @@ func createToolBuffer() (err error) {
 
 func toolListUpdate() (result string, err error) {
     now := (time.Now()).Unix()
-    if (now - 600) < tool_buffer.timestamp {
+    if (now - 1800) < tool_buffer.timestamp {
         result = "Too soon, can't update yet."
         return
     }
