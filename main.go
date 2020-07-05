@@ -54,6 +54,8 @@ func createToolBuffer() (err error) {
     tool_buffer.content = fmt.Sprintf("%s", body)
     tool_buffer.timestamp = (time.Now()).Unix()
 
+    entry_list = nil
+
     scanner := bufio.NewScanner(strings.NewReader(tool_buffer.content))
     for scanner.Scan() {
         var entry_tmp entry_t
@@ -67,6 +69,19 @@ func createToolBuffer() (err error) {
 
         entry_list = append(entry_list, entry_tmp)
     }
+
+    return
+}
+
+func toolListUpdate() (result string, err error) {
+    now := (time.Now()).Unix()
+    if (now - 600) < tool_buffer.timestamp {
+        result = "Too soon, can't update yet."
+        return
+    }
+
+    err = createToolBuffer()
+    result = "Updated!"
 
     return
 }
@@ -107,6 +122,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     switch tokenized[0] {
     case "+ping":
         s.ChannelMessageSend(m.ChannelID, prettyOutput("pong"))
+
     case "+search":
         // Needs a parameters to search for
         if len(tokenized[0:]) < 2 {
@@ -122,6 +138,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
             return
         }
 
+        s.ChannelMessageSend(m.ChannelID, prettyOutput(output))
+
+    case "+update":
+        output, _ := toolListUpdate()
         s.ChannelMessageSend(m.ChannelID, prettyOutput(output))
     }
 }
