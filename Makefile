@@ -2,12 +2,16 @@ BIN = blackarch-bot
 SOURCE = $(wildcard *.go)
 LDFLAGS = -ldflags "-s -w"
 
-default:
-	@echo 'check the Makefile for clues'
+build:
+	@go build $(LDFLAGS) -o $(BIN) $(SRC)
 
 clean:
 	@rm -rfv $(BIN)
 
-build:
-	@go build $(LDFLAGS) -o $(BIN) $(SRC)
+run: build
+ifdef TOKEN
+	./$(BIN) -token $(TOKEN)
+else
+	@echo "No token"
+endif
 
