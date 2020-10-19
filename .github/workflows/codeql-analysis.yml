@@ -1,0 +1,41 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+  schedule:
+    - cron: '0 11 * * 3'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['go']
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Build
+      uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - run: |
+        go get github.com/bwmarrin/discordgo
+        go build -ldflags "-s -w" -o blackarch-bot *.go
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
+
