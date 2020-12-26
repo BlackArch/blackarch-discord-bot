@@ -32,10 +32,22 @@ var (
     entry_list []entry_t
 )
 
-func prettyOutput(output string) (string) {
-    pretty := "```" + output + "```"
+func prettyOutput(text string) (*discordgo.MessageEmbed) {
+    thumbnail := discordgo.MessageEmbedThumbnail{
+        URL: "https://blackarch.org/images/logo/ba-logo.png",
+        Width: 50,
+        Height: 50,
+    }
+    
+    output := discordgo.MessageEmbed{
+        Title: "BlackArch Tool Search",
+        URL: "https://blackarch.org/tools.html",
+        Thumbnail: &thumbnail,
+        Color: 13369344,
+        Description: text,
+    }
 
-    return pretty
+    return &output
 }
 
 func bot_log(m *discordgo.MessageCreate, trigger string) {
@@ -99,7 +111,7 @@ func searchTool(search string) (output string, err error) {
                 element.description, element.group, element.url)
 
             if len(output) >= 1000 {
-                output += "\n-> TRUNCATED... too big, change your search."
+                output += "\n-> **TRUNCATED**: too big, change your search."
                 break
             }
         }
@@ -125,28 +137,28 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
     switch tokenized[0] {
     case "+ping":
-        s.ChannelMessageSend(m.ChannelID, prettyOutput("pong"))
+        s.ChannelMessageSendEmbed(m.ChannelID, prettyOutput("pong"))
 
     case "+search":
         // Needs a parameters to search for
         if len(tokenized[0:]) < 2 {
-            s.ChannelMessageSend(m.ChannelID,
+            s.ChannelMessageSendEmbed(m.ChannelID,
                 prettyOutput("Are you crazy? Search what?"))
             return
         }
 
         output, err := searchTool(tokenized[1])
         if err != nil {
-            s.ChannelMessageSend(m.ChannelID,
+            s.ChannelMessageSendEmbed(m.ChannelID,
                 prettyOutput("Something is wrong. Get a hold of an admin!"))
             return
         }
 
-        s.ChannelMessageSend(m.ChannelID, prettyOutput(output))
+        s.ChannelMessageSendEmbed(m.ChannelID, prettyOutput(output))
 
     case "+update":
         output, _ := toolListUpdate()
-        s.ChannelMessageSend(m.ChannelID, prettyOutput(output))
+        s.ChannelMessageSendEmbed(m.ChannelID, prettyOutput(output))
     }
 }
 
